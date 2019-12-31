@@ -24,13 +24,13 @@ user_table_create = (
 song_table_create = (
     "CREATE table IF NOT EXISTS songs (" \
         "song_id varchar, title varchar, artist_id varchar," \
-        "year numeric, duration numeric)"
+        "year int, duration numeric)"
     )
 
 artist_table_create = (
     "CREATE table IF NOT EXISTS artists (" \
         "artist_id varchar, name varchar, location varchar," \
-        "latitude varchar, longitude varchar)"
+        "latitude numeric, longitude numeric)"
     )
 
 time_table_create = (
@@ -47,11 +47,17 @@ songplay_table_insert = ("""
 user_table_insert = ("""
 """)
 
-song_table_insert = ("""
-""")
+song_table_insert = (
+    "INSERT INTO songs(" \
+        "song_id, title, artist_id, year, duration)" \
+        "VALUES (%s, %s, %s, %s, %s);"
+   )
 
-artist_table_insert = ("""
-""")
+artist_table_insert = (
+        "INSERT INTO artists(" \
+        "artist_id, name, location, latitude, longitude)" \
+        "VALUES (%s, %s, %s, %s, %s);"
+)
 
 
 time_table_insert = ("""
