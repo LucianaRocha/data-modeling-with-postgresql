@@ -30,16 +30,17 @@ logfiles_table_create = (
 # CREATE TABLES 
  
 songplay_table_create = (
-    "CREATE table IF NOT EXISTS songplay (" \
-        "songplay_id int, start_time int, user_id int," \
-        "level varchar, song_id varchar, artist_id int," \
+    "CREATE table IF NOT EXISTS songplays (" \
+        "songplay_id int, start_time TIMESTAMP, user_id int," \
+        "level varchar, song_id varchar, artist_id varchar," \
         "session_id int, location varchar, user_agent varchar)"
     )
 
 user_table_create = (
     "CREATE table IF NOT EXISTS users (" \
         "user_id int, first_name varchar, last_name varchar," \
-        "gender varchar, level varchar)"
+        "gender varchar, level varchar, "
+        "PRIMARY KEY (user_id))"
     )
 
 song_table_create = (
@@ -47,10 +48,7 @@ song_table_create = (
         "song_id varchar NOT NULL, title varchar," \
         "artist_id varchar NOT NULL," \
         "year int, duration numeric," \
-        "PRIMARY KEY (song_id, artist_id)," \
-            "CONSTRAINT songs_artist_id_fkey FOREIGN KEY (artist_id) " \
-                "REFERENCES artists (artist_id) MATCH SIMPLE " \
-                "ON UPDATE NO ACTION ON DELETE NO ACTION)"
+        "PRIMARY KEY (song_id))"
     )
 
 artist_table_create = (
@@ -63,8 +61,9 @@ artist_table_create = (
 
 time_table_create = (
     "CREATE table IF NOT EXISTS time (" \
-        "start_time date, hour numeric, day numeric," \
-        "week numeric, month numeric, year numeric, weekday numeric)"
+        "start_time TIMESTAMP, hour numeric, day numeric," \
+        "week numeric, month numeric, year numeric, weekday numeric," \
+        "PRIMARY KEY (start_time))"
     )
 
 # INSERT RECORDS
@@ -84,20 +83,36 @@ songdata_table_insert = (
         "VALUES (%s, %s, %s, %s, %s, %s);"
 ) 
 
-songplay_table_insert = ("""
-""")
+songplay_table_insert = (
+    "INSERT INTO songplays(" \
+        "songplay_id, start_time, user_id, level," \
+        "song_id, artist_id, session_id, location, user_agent)" \
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+) 
 
 user_table_insert = (
     "INSERT INTO users(" \
         "user_id, first_name, last_name," \
         "gender, level)" \
-        "VALUES (%s, %s, %s, %s, %s);"
+        "VALUES (%s, %s, %s, %s, %s)" \
+        "ON CONFLICT (user_id)" \
+        "DO UPDATE " \
+            "SET first_name  = EXCLUDED.first_name," \
+                "last_name  = EXCLUDED.last_name," \
+                "gender  = EXCLUDED.gender," \
+                "level  = EXCLUDED.level;"
 )
 
 song_table_insert = (
     "INSERT INTO songs(" \
         "song_id, title, artist_id, year, duration)" \
-        "VALUES (%s, %s, %s, %s, %s);"
+        "VALUES (%s, %s, %s, %s, %s)" \
+        "ON CONFLICT (song_id)" \
+        "DO UPDATE " \
+            "SET title  = EXCLUDED.title," \
+                "artist_id  = EXCLUDED.artist_id," \
+                "year  = EXCLUDED.year," \
+                "duration  = EXCLUDED.duration;"
 )
 
 artist_table_insert = (
@@ -117,14 +132,27 @@ time_table_insert = (
         "INSERT INTO time(" \
         "start_time, hour, day, week, month," \
         "year, weekday)"
-        "VALUES (%s, %s, %s, %s, %s, %s, %s);"
+        "VALUES (%s, %s, %s, %s, %s, %s, %s)" \
+        "ON CONFLICT (start_time)" \
+        "DO UPDATE " \
+            "SET hour  = EXCLUDED.hour," \
+                "day = EXCLUDED.day," \
+                "week  = EXCLUDED.week," \
+                "month = EXCLUDED.month;"
 )
 
 # FIND SONGS
 
-song_select = ("""
-""")
+song_select = (
+    "SELECT songs.song_id as songid, songs.artist_id as artistid " \
+    "FROM songs songs INNER JOIN " \
+    "artists artists ON songs.artist_id = artists.artist_id " \
+    "WHERE songs.title = %s AND " \
+        "artists.name = %s AND " \
+        "songs.duration = %s " \
+    "ORDER BY songs.song_id asc"
+)
 
 # QUERY LISTS
-create_table_queries = [songdata_table_create, songplay_table_create, user_table_create, artist_table_create, song_table_create, time_table_create, logfiles_table_create]
+create_table_queries = [songdata_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create, logfiles_table_create]
 drop_table_queries = [songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
