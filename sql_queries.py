@@ -1,5 +1,6 @@
 # DROP TABLES
-
+songdata_table_drop = "DROP table IF EXISTS songdata;"
+logfiles_table_drop = "DROP table IF EXISTS logfiles ;"
 songplay_table_drop = "DROP table IF EXISTS songplay;"
 user_table_drop = "DROP table IF EXISTS users;"
 song_table_drop = "DROP table IF EXISTS songs;"
@@ -11,9 +12,9 @@ time_table_drop = "DROP table IF EXISTS time;"
 
 songdata_table_create = (
     "CREATE table IF NOT EXISTS songdata (" \
-        "artist_id varchar, artist_location varchar," \
-        "artist_name varchar, song_id varchar, title varchar," \
-        "year varchar)"
+        "num_songs int,artist_id varchar,artist_latitude numeric," \
+        "artist_longitude numeric,artist_location varchar,artist_name varchar," \
+        "song_id varchar, title varchar, duration numeric,year int)"
     )
   
 
@@ -21,10 +22,10 @@ logfiles_table_create = (
     "CREATE table IF NOT EXISTS logfiles (" \
         "artist varchar, auth varchar, firstName varchar," \
         "gender varchar, itemInSession int, lastName varchar," \
-        "length varchar, level varchar, location varchar," \
-        "method varchar, page varchar, registration varchar," \
-        "sessionId varchar, song varchar, status varchar," \
-        "ts varchar, userAgent text, userId varchar)"
+        "length numeric, level varchar, location varchar," \
+        "method varchar, page varchar, registration numeric," \
+        "sessionId int, song varchar, status int," \
+        "ts bigint, userAgent text, userId varchar)"
     )
 
 # CREATE TABLES 
@@ -66,7 +67,8 @@ time_table_create = (
         "PRIMARY KEY (start_time))"
     )
 
-# INSERT RECORDS
+# INSERT RECORDS STAGING AREA: is a set of tables that represent a true copy of the data source
+# SONGDATA and LOGFILES
 
 logfiles_table_insert = (
     "INSERT INTO logfiles(" \
@@ -78,11 +80,12 @@ logfiles_table_insert = (
 
 songdata_table_insert = (
     "INSERT INTO songdata(" \
-        "artist_id, artist_location, artist_name," \
-        "song_id, title, year)" \
-        "VALUES (%s, %s, %s, %s, %s, %s);"
+        "num_songs,artist_id,artist_latitude,artist_longitude," \
+        "artist_location,artist_name,song_id,title,duration,year)" \
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 ) 
 
+# INSERT RECORDS
 songplay_table_insert = (
     "INSERT INTO songplays(" \
         "songplay_id, start_time, user_id, level," \
@@ -154,5 +157,5 @@ song_select = (
 )
 
 # QUERY LISTS
-create_table_queries = [songdata_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create, logfiles_table_create]
-drop_table_queries = [songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
+create_table_queries = [songdata_table_create,logfiles_table_create,songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
+drop_table_queries = [songdata_table_drop, logfiles_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
