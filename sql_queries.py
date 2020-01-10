@@ -1,47 +1,22 @@
 # DROP TABLES
-songdata_table_drop = "DROP table IF EXISTS songdata;"
-logfiles_table_drop = "DROP table IF EXISTS logfiles ;"
 songplay_table_drop = "DROP table IF EXISTS songplay;"
 user_table_drop = "DROP table IF EXISTS users;"
-song_table_drop = "DROP table IF EXISTS songs;"
-artist_table_drop = "DROP table IF EXISTS artists;"
 time_table_drop = "DROP table IF EXISTS time;"
+artist_table_drop = "DROP table IF EXISTS artists;"
+song_table_drop = "DROP table IF EXISTS songs;"
 
-# CREATE STAGING AREA: is a set of tables that represent a true copy of the data source
-# SONGDATA and LOGFILES
-
-songdata_table_create = (
-    "CREATE table IF NOT EXISTS songdata (" \
-        "num_songs int,artist_id varchar,artist_latitude numeric," \
-        "artist_longitude numeric,artist_location varchar,artist_name varchar," \
-        "song_id varchar, title varchar, duration numeric,year int)"
-    )
-  
-
-logfiles_table_create = (
-    "CREATE table IF NOT EXISTS logfiles (" \
-        "artist varchar, auth varchar, firstName varchar," \
-        "gender varchar, itemInSession int, lastName varchar," \
-        "length numeric, level varchar, location varchar," \
-        "method varchar, page varchar, registration numeric," \
-        "sessionId int, song varchar, status int," \
-        "ts bigint, userAgent text, userId varchar)"
-    )
-
-# CREATE TABLES 
- 
+# CREATE TABLES
 songplay_table_create = (
     "CREATE table IF NOT EXISTS songplays (" \
-        "songplay_id int, start_time TIMESTAMP, user_id int," \
-        "level varchar, song_id varchar, artist_id varchar," \
-        "session_id int, location varchar, user_agent varchar)"
-    )
-
-user_table_create = (
-    "CREATE table IF NOT EXISTS users (" \
-        "user_id int, first_name varchar, last_name varchar," \
-        "gender varchar, level varchar, "
-        "PRIMARY KEY (user_id))"
+        "songplay_id int NOT NULL, start_time TIMESTAMP," \
+        "user_id int, level varchar, song_id varchar," \
+        "artist_id varchar, session_id int, location varchar," \
+        "user_agent varchar, " \
+        "PRIMARY KEY (songplay_id), " \
+        "FOREIGN KEY (start_time) REFERENCES time (start_time), " \
+        "FOREIGN KEY (user_id) REFERENCES users (user_id), " \
+        "FOREIGN KEY (song_id) REFERENCES songs (song_id), " \
+        "FOREIGN KEY (artist_id) REFERENCES artists (artist_id))"
     )
 
 song_table_create = (
@@ -67,45 +42,14 @@ time_table_create = (
         "PRIMARY KEY (start_time))"
     )
 
-# INSERT RECORDS STAGING AREA: is a set of tables that represent a true copy of the data source
-# SONGDATA and LOGFILES
-
-logfiles_table_insert = (
-    "INSERT INTO logfiles(" \
-        "artist, auth, firstName, gender, itemInSession, lastName," \
-        "length, level, location, method, page, registration," \
-        "sessionId, song, status, ts, userAgent, userId)" \
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
-)
-
-songdata_table_insert = (
-    "INSERT INTO songdata(" \
-        "num_songs,artist_id,artist_latitude,artist_longitude," \
-        "artist_location,artist_name,song_id,title,duration,year)" \
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
-) 
+user_table_create = (
+    "CREATE table IF NOT EXISTS users (" \
+        "user_id int, first_name varchar, last_name varchar," \
+        "gender varchar, level varchar, "
+        "PRIMARY KEY (user_id))"
+    )
 
 # INSERT RECORDS
-songplay_table_insert = (
-    "INSERT INTO songplays(" \
-        "songplay_id, start_time, user_id, level," \
-        "song_id, artist_id, session_id, location, user_agent)" \
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
-) 
-
-user_table_insert = (
-    "INSERT INTO users(" \
-        "user_id, first_name, last_name," \
-        "gender, level)" \
-        "VALUES (%s, %s, %s, %s, %s)" \
-        "ON CONFLICT (user_id)" \
-        "DO UPDATE " \
-            "SET first_name  = EXCLUDED.first_name," \
-                "last_name  = EXCLUDED.last_name," \
-                "gender  = EXCLUDED.gender," \
-                "level  = EXCLUDED.level;"
-)
-
 song_table_insert = (
     "INSERT INTO songs(" \
         "song_id, title, artist_id, year, duration)" \
@@ -130,7 +74,6 @@ artist_table_insert = (
                 "longitude = EXCLUDED.longitude;"
 )
 
-
 time_table_insert = (
         "INSERT INTO time(" \
         "start_time, hour, day, week, month," \
@@ -144,8 +87,27 @@ time_table_insert = (
                 "month = EXCLUDED.month;"
 )
 
-# FIND SONGS
+user_table_insert = (
+    "INSERT INTO users(" \
+        "user_id, first_name, last_name," \
+        "gender, level)" \
+        "VALUES (%s, %s, %s, %s, %s)" \
+        "ON CONFLICT (user_id)" \
+        "DO UPDATE " \
+            "SET first_name  = EXCLUDED.first_name," \
+                "last_name  = EXCLUDED.last_name," \
+                "gender  = EXCLUDED.gender," \
+                "level  = EXCLUDED.level;"
+)
 
+songplay_table_insert = (
+    "INSERT INTO songplays(" \
+        "songplay_id, start_time, user_id, level," \
+        "song_id, artist_id, session_id, location, user_agent)" \
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+) 
+
+# FIND SONGS
 song_select = (
     "SELECT songs.song_id as songid, songs.artist_id as artistid " \
     "FROM songs songs INNER JOIN " \
@@ -157,5 +119,5 @@ song_select = (
 )
 
 # QUERY LISTS
-create_table_queries = [songdata_table_create,logfiles_table_create,songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
-drop_table_queries = [songdata_table_drop, logfiles_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
+create_table_queries = [song_table_create, artist_table_create, time_table_create, user_table_create, songplay_table_create]
+drop_table_queries = [song_table_drop, artist_table_drop, time_table_drop, user_table_drop, songplay_table_drop]
